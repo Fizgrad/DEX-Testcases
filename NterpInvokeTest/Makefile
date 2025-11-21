@@ -14,7 +14,7 @@ JAVA ?= javac
 JAVAC_FLAGS := -encoding UTF-8 -source 1.8 -target 1.8
 JAR ?= jar
 D8 ?= $(SDK_D8)
-D8_FLAGS := --release --no-desugaring
+D8_FLAGS := --release # --no-desugaring
 
 ADB ?= adb
 ADB_REMOTE ?= /data/local/tmp/$(APP).dex

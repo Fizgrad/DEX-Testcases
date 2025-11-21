@@ -16,3 +16,4 @@ build/
 out
 .gradle/
 dex
+dalvikvm64.sh
