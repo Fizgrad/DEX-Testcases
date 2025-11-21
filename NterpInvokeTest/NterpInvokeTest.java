@@ -159,6 +159,8 @@ public class NterpInvokeTest {
   // 目标静态方法：对应 invoke-polymorphic（非 range）
   private static long polyTargetNonRange(int a, long b, float c, double d,
                                          Box box) {
+    System.out.println("polyTargetNonRange d = " + d + " bits=" +
+                       Long.toHexString(Double.doubleToLongBits(d)));
     long r = 0;
     r ^= 0x0100000000000000L * a;
     r ^= 0x0200000000000000L * (b & 0xff); // 只看低 8 bit 防止太大
