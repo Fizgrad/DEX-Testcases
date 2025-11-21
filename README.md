@@ -34,7 +34,7 @@ adb push ${TARGET}.dex /data/local/tmp/
 
 ### Env
 
-- `D8`: Path to `d8`, e.g., `android-sdk/build-tools/*/d8` (defaults to `d8` on PATH if not set).
+- `D8`: Path to `d8`, e.g., `android-sdk/build-tools/*/d8` (defaults to `SDK_D8`).
 - `ADB_REMOTE`: Push destination, defaults to `/data/local/tmp/<module>.dex`.
 
 ### Config (SDK/NDK paths)
@@ -44,13 +44,13 @@ adb push ${TARGET}.dex /data/local/tmp/
 
 ## Running on device ART
 
-After pushing a `.dex` to the device (e.g., `/data/local/tmp/NullBytecodeSamples.dex`), you can run it with Dalvik/ART:
+After pushing a `.dex` to the device, you can run it with Dalvik/ART:
 
 ```bash
 dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/<dex-file>.dex <fully.qualified.MainClass> main
 ```
 
-Example:
+e.g. `/data/local/tmp/HeapAllocationTest.dex`:
 
 ```bash
 dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/HeapAllocationTest.dex HeapAllocationTest main
