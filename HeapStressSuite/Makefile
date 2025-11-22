@@ -1,7 +1,7 @@
 -include ../config.mk
 
-APP := NativeAltSmoke
-SRC := $(APP).java
+APP := HeapStressSuite
+SRC := HeapStressSuite.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes

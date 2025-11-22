@@ -3,7 +3,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.*;
 
-public class HeapAllocationTest {
+public class HeapStressSuite {
 
   // —— 长生命周期：模拟“老年代/长期可达” —— //
   private static List<Object> staticHolder = new ArrayList<>();

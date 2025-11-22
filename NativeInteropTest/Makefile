@@ -1,6 +1,6 @@
 -include ../config.mk
 
-APP := ArtNativeTest
+APP := NativeInteropTest
 
 SRC_DIR := src/main/java
 SOURCES := $(shell find $(SRC_DIR) -name '*.java')

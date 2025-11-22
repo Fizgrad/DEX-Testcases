@@ -1,20 +1,20 @@
 -include ../config.mk
 
-APP := NterpInvokeTest
-SRC := $(APP).java
+APP := BytecodePlayground
+SRC := BytecodePlayground.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes
-JAR_FILE := $(OUT_DIR)/$(APP).jar
+JAR_BASENAME ?= bytecode-playground
+JAR_FILE := $(OUT_DIR)/$(JAR_BASENAME).jar
 DEX_DIR := dex
 DEX_FILE := $(DEX_DIR)/$(APP).dex
-MIN_API ?= 35
+MIN_API ?= 21
 
 JAVA ?= javac
 JAVAC_FLAGS := -encoding UTF-8 -source 1.8 -target 1.8
 JAR ?= jar
 D8 ?= $(SDK_D8)
-D8_FLAGS := --release # --no-desugaring
 
 ADB ?= adb
 ADB_REMOTE ?= /data/local/tmp/$(APP).dex
@@ -28,7 +28,7 @@ $(JAR_FILE): $(CLASSES_DIR)/$(APP).class
 	$(JAR) cf $@ -C $(CLASSES_DIR) .
 
 $(DEX_FILE): $(JAR_FILE) | $(DEX_DIR)
-	$(D8) $(D8_FLAGS) --min-api $(MIN_API) --output $(DEX_DIR) $(JAR_FILE)
+	$(D8) --release --min-api $(MIN_API) --output $(DEX_DIR) $(JAR_FILE)
 	mv $(DEX_DIR)/classes.dex $@
 
 push: $(DEX_FILE)

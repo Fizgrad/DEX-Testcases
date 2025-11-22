@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class ArtVmSelfTest {
+public final class GcReferenceSuite {
 
     // --- 小工具 ---
     private static void assertTrue(boolean cond, String msg) {
@@ -129,7 +129,7 @@ public final class ArtVmSelfTest {
     // --- 5) 反射 ---
     private static void testReflection() throws Exception {
         System.out.println("[5] Reflection invoke");
-        Method m = ArtVmSelfTest.class.getDeclaredMethod("hiddenAdd", int.class, int.class);
+        Method m = GcReferenceSuite.class.getDeclaredMethod("hiddenAdd", int.class, int.class);
         m.setAccessible(true);
         Object r = m.invoke(null, 7, 35);
         System.out.println("  hiddenAdd(7,35) = " + r);

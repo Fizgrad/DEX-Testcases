@@ -1,7 +1,7 @@
 -include ../config.mk
 
-APP := HeapAllocationTest
-SRC := $(APP).java
+APP := StringBuilderIntrinsicTest
+SRC := StringBuilderIntrinsicTest.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes

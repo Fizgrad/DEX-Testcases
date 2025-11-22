@@ -1,12 +1,11 @@
 -include ../config.mk
 
-APP := BytecodeExercise
-SRC := $(APP).java
+APP := GcReferenceSuite
+SRC := GcReferenceSuite.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes
-JAR_BASENAME ?= bytecode-exercise
-JAR_FILE := $(OUT_DIR)/$(JAR_BASENAME).jar
+JAR_FILE := $(OUT_DIR)/$(APP).jar
 DEX_DIR := dex
 DEX_FILE := $(DEX_DIR)/$(APP).dex
 MIN_API ?= 21

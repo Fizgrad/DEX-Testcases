@@ -1,7 +1,7 @@
 -include ../config.mk
 
-APP := LocaleDataNpeRepro
-SRC := $(APP).java
+APP := NativeIOSmoke
+SRC := NativeIOSmoke.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes

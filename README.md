@@ -7,7 +7,7 @@ Small collection of Java snippets used to probe Android Runtime behaviour and by
 Each subdirectory ships a Makefile. Typical use:
 
 1. `cd <module>`
-2. `make` (builds `.jar` and `.dex`; ArtNativeTest also builds the native `.so`)
+2. `make` (builds `.jar` and `.dex`; NativeInteropTest also builds the native `.so`)
 3. Optional: `make push` to send the dex (and native lib, if present) to a device via `adb`.
 4. Optional: `make clean` to drop generated Java outputs; some modules also have `clean-native`.
 
@@ -34,13 +34,26 @@ adb push ${TARGET}.dex /data/local/tmp/
 
 ### Env
 
-- `D8`: Path to `d8`, e.g., `android-sdk/build-tools/*/d8` (defaults to `SDK_D8`).
+- `D8`: Path to `d8`, e.g., `android-sdk/build-tools/*/d8` (defaults to `SDK_D8` / `d8` on PATH).
 - `ADB_REMOTE`: Push destination, defaults to `/data/local/tmp/<module>.dex`.
 
 ### Config (SDK/NDK paths)
 
 - Edit `config.mk` in the repo root to set `ANDROID_SDK`, `ANDROID_NDK`, `SDK_D8`, `BUILD_TOOLS_VERSION`, and `PLATFORM_API` (defaults are empty or `d8` on PATH). Every module Makefile does `-include ../config.mk`, so these settings flow everywhere.
 - You can still override per-invocation: `make D8=/path/to/d8`, `make ANDROID_SDK=...`.
+
+## Modules (renamed for clarity)
+
+- `NullBytecodeSamples`: Null writes in fields/arrays/locals to inspect bytecode.
+- `BytecodePlayground`: Mixed bytecode/stack shape experiments.
+- `GcReferenceSuite`: GC/reference/ReferenceQueue behaviours.
+- `HeapStressSuite`: Heap pressure + allocation/GC monitoring.
+- `HelloWorldSample`: Minimal hello-world sanity check.
+- `LocalePrintfRepro`: Locale printf formatting / NPE repro.
+- `NativeIOSmoke`: mmap/UTF-8/Normalizer/LockSupport smoke checks.
+- `InvokeShapeTest`: invoke-* shape coverage (static/instance/interface).
+- `StringBuilderIntrinsicTest`: StringBuilder intrinsic/arg shape checks.
+- `NativeInteropTest`: JNI checksum/probe (main class still `com.example.artnative.ArtNativeTest`).
 
 ## Running on device ART
 
@@ -50,8 +63,8 @@ After pushing a `.dex` to the device, you can run it with Dalvik/ART:
 dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/<dex-file>.dex <fully.qualified.MainClass> main
 ```
 
-e.g. `/data/local/tmp/HeapAllocationTest.dex`:
+Example for HeapStressSuite:
 
 ```bash
-dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/HeapAllocationTest.dex HeapAllocationTest main
+dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/HeapStressSuite.dex HeapStressSuite main
 ```

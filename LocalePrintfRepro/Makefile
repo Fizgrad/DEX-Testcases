@@ -1,7 +1,7 @@
 -include ../config.mk
 
-APP := StringBuilderTest
-SRC := $(APP).java
+APP := LocalePrintfRepro
+SRC := LocalePrintfRepro.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes

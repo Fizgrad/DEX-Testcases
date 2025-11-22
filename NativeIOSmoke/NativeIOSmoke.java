@@ -1,4 +1,4 @@
-// NativeAltSmoke.java
+// NativeIOSmoke.java
 import java.io.*;
 import java.nio.*;
 import java.nio.channels.FileChannel;
@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
-public class NativeAltSmoke {
+public class NativeIOSmoke {
     // --- 断言/统计 ---
     static int PASS = 0, FAIL = 0;
     static void log(String s){ System.out.println(s); }

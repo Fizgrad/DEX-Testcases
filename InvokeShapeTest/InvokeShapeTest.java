@@ -3,7 +3,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.util.function.LongSupplier;
 
-public class NterpInvokeTest {
+public class InvokeShapeTest {
 
   // ---- 小工具：编码参数，方便做校验 ----
   static final class Box {
@@ -190,7 +190,7 @@ public class NterpInvokeTest {
         MethodType.methodType(long.class, int.class, long.class, float.class,
                               double.class, Box.class);
     MethodHandle mh1 = MethodHandles.lookup().findStatic(
-        NterpInvokeTest.class, "polyTargetNonRange", mt1);
+        InvokeShapeTest.class, "polyTargetNonRange", mt1);
 
     long e1 = polyTargetNonRange(a, b, c, d, box);
     long r1 = (long)mh1.invokeExact(a, b, c, d, box);
@@ -201,7 +201,7 @@ public class NterpInvokeTest {
         MethodType.methodType(long.class, int.class, long.class, float.class,
                               double.class, Box.class, int.class);
     MethodHandle mh2 = MethodHandles.lookup().findStatic(
-        NterpInvokeTest.class, "polyTargetRange", mt2);
+        InvokeShapeTest.class, "polyTargetRange", mt2);
 
     long e2 = polyTargetRange(a, b, c, d, box, extra);
     long r2 = (long)mh2.invokeExact(a, b, c, d, box, extra);

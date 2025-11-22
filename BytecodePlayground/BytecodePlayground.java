@@ -1,4 +1,4 @@
-// BytecodeExercise.java
+// BytecodePlayground.java
 import java.io.IOException;
 import java.lang.ref.*;
 import java.lang.reflect.*;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.*;
 import java.util.zip.Deflater;
 import java.util.zip.Inflater;
 
-public class BytecodeExercise {
+public class BytecodePlayground {
 
   // ====== 原有字段/类型 ======
   static int S_I = 1;
@@ -469,14 +469,14 @@ public class BytecodeExercise {
     return () -> {
       while (env.running) {
         try {
-          Method m = BytecodeExercise.class.getDeclaredMethod(
+          Method m = BytecodePlayground.class.getDeclaredMethod(
               "hiddenAdd", int.class, int.class);
           m.setAccessible(true);
           int r = (Integer)m.invoke(null, 7, 35);
           if (r != 42)
             throw new AssertionError("reflection result != 42");
 
-          ClassLoader parent = BytecodeExercise.class.getClassLoader();
+          ClassLoader parent = BytecodePlayground.class.getClassLoader();
           TempLoader loader = new TempLoader(parent);
           I proxy = (I)java.lang.reflect.Proxy.newProxyInstance(
               loader, new Class<?>[] {I.class},
@@ -906,7 +906,7 @@ public class BytecodeExercise {
 
   // ====== 原有自检 ======
   private static void runSelfcheckOnce() {
-    BytecodeExercise be = new BytecodeExercise();
+    BytecodePlayground be = new BytecodePlayground();
     A a = new A();
     B b = new B();
 

@@ -20,7 +20,7 @@ push:
 		$(MAKE) -C $$d push || exit $$?; \
 	done
 
-# For modules that define a clean-native target (e.g., ArtNativeTest).
+# For modules that define a clean-native target (e.g., NativeInteropTest).
 clean-native:
 	@for d in $(MODULES); do \
 		$(MAKE) -C $$d clean-native >/dev/null 2>&1 || true; \

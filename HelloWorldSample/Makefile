@@ -1,7 +1,7 @@
 -include ../config.mk
 
-APP := ArtVmSelfTest
-SRC := $(APP).java
+APP := HelloWorldSample
+SRC := HelloWorldSample.java
 
 OUT_DIR := out
 CLASSES_DIR := $(OUT_DIR)/classes

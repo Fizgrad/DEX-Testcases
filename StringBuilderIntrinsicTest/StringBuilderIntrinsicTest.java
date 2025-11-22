@@ -1,4 +1,4 @@
-public class StringBuilderTest {
+public class StringBuilderIntrinsicTest {
 
   public static void main(String[] args) {
     System.out.println("Starting StringBuilder 64-bit Intrinsic Tests...");
