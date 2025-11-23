@@ -42,7 +42,7 @@ adb push ${TARGET}.dex /data/local/tmp/
 - Edit `config.mk` in the repo root to set `ANDROID_SDK`, `ANDROID_NDK`, `SDK_D8`, `BUILD_TOOLS_VERSION`, and `PLATFORM_API` (defaults are empty or `d8` on PATH). Every module Makefile does `-include ../config.mk`, so these settings flow everywhere.
 - You can still override per-invocation: `make D8=/path/to/d8`, `make ANDROID_SDK=...`.
 
-## Modules (renamed for clarity)
+## Modules
 
 - `NullBytecodeSamples`: Null writes in fields/arrays/locals to inspect bytecode.
 - `BytecodePlayground`: Mixed bytecode/stack shape experiments.
@@ -54,6 +54,7 @@ adb push ${TARGET}.dex /data/local/tmp/
 - `InvokeShapeTest`: invoke-* shape coverage (static/instance/interface).
 - `StringBuilderIntrinsicTest`: StringBuilder intrinsic/arg shape checks.
 - `NativeInteropTest`: JNI checksum/probe (main class still `com.example.artnative.ArtNativeTest`).
+- `ICUTestSuite`: Exercises `android.icu` (ULocale, Number/Currency/CompactDecimal formats, calendars, time zones, collation, BreakIterator, Transliterator, UnicodeSet, normalization/casing, MessageFormat/PluralRules, MeasureFormat, RelativeDateTimeFormatter, VersionInfo).
 
 ## Running on device ART
 
