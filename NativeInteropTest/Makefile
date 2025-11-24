@@ -27,7 +27,11 @@ ADB ?= adb
 ADB_REMOTE ?= /data/local/tmp/$(APP).dex
 LIB_REMOTE ?= /data/local/tmp/libartnativetest.so
 
-all: $(DEX_FILE) $(BUILD_DIR)/libartnativetest.so
+all: java native
+
+.PHONY: java native
+java: $(DEX_FILE)
+native: $(BUILD_DIR)/libartnativetest.so
 
 ifeq ($(strip $(NDK)),)
 $(error ANDROID_NDK is not set. Configure it in ../config.mk or export ANDROID_NDK)
