@@ -113,14 +113,20 @@ public class HeapStressSuite {
     System.out.println(
         "\n========== 测试场景8: 多线程分配（并发/停留少量引用） ==========");
     testMultithreadedAllocation(/*seconds*/ 10, /*ringSize*/ 512);
-
     System.out.println(
-        "\n========== 测试场景9: 大量分配后回收（你的原始场景1） ==========");
-    testMassiveAllocationWithGC();
+        "\n========== 测试场景9: 分阶段堆顶脉冲分配/回收 ==========");
+    testPhasedHeapPulse();
 
     System.out.println(
         "\n========== 测试场景10: 大量分配不回收（你的原始场景2） ==========");
     testMassiveAllocationWithoutGC();
+
+    System.out.println("\n========== 测试场景11: 占满堆后强制 GC ==========");
+    testHeapSaturationThenGc();
+
+    System.out.println(
+        "\n========== 测试场景12: 基础 Object 引用可用性检查 ==========");
+    testPlainObjectReferences();
 
     // 汇总
     System.out.println("\n========== 汇总 ==========");
@@ -334,35 +340,29 @@ public class HeapStressSuite {
     printMemory("并发压力结束后");
   }
 
-  /** 你的原始场景1：大量分配 -> 释放 -> GC -> 再来一轮 */
-  private static void testMassiveAllocationWithGC() {
+  /** 场景9：重复冲击堆顶（批次填充 -> 释放 -> 强 GC） */
+  private static void testPhasedHeapPulse() {
     printMemory("开始前");
-    int count = 200000;
-    List<byte[]> tempList = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      byte[] b = new byte[1024];
-      tempList.add(b);
-      bytesAllocated.addAndGet(b.length);
-      if (i % 1000 == 0)
-        printMemory("i=" + i);
-    }
-    printMemory("分配后");
-    tempList = null;
-    forceGc();
-    printMemory("回收后");
+    final long max = Runtime.getRuntime().maxMemory();
+    final long target = Math.max(64L * 1024 * 1024, (long)(max * 0.35));
+    final int chunkSize = 2 * 1024 * 1024;
 
-    tempList = new ArrayList<>();
-    for (int i = 0; i < count; i++) {
-      byte[] b = new byte[1024];
-      tempList.add(b);
-      bytesAllocated.addAndGet(b.length);
-      if (i % 1000 == 0)
-        printMemory("i=" + i);
+    for (int round = 1; round <= 3; round++) {
+      List<byte[]> keep = new ArrayList<>();
+      long used = 0;
+      while (used < target) {
+        byte[] block = new byte[chunkSize];
+        keep.add(block);
+        used += block.length;
+        bytesAllocated.addAndGet(block.length);
+        if ((keep.size() & 3) == 0)
+          printMemory("第" + round + "轮填充: ≈" + bytesToMB(used) + "MB");
+      }
+      printMemory("第" + round + "轮填充完成");
+      keep = null;
+      forceGc();
+      printMemory("第" + round + "轮回收后");
     }
-    printMemory("分配后(第二轮)");
-    tempList = null;
-    forceGc();
-    printMemory("回收后(第二轮)");
   }
 
   /** 你的原始场景2：不释放直到 OOME */
@@ -377,9 +377,56 @@ public class HeapStressSuite {
           printMemory("已分配对象数: " + staticHolder.size());
       }
     } catch (OutOfMemoryError e) {
-      staticHolder = null; // 释放引用
+      staticHolder.clear(); // 释放引用但保持容器可用
       forceGc();
       printMemory("溢出回收后");
+    }
+  }
+
+  /** 场景11：尽量占满堆后释放并触发一次完整 GC */
+  private static void testHeapSaturationThenGc() {
+    printMemory("开始前");
+    List<byte[]> keep = new ArrayList<>();
+    final int chunkSize = 4 * 1024 * 1024; // 4MB
+    try {
+      while (true) {
+        byte[] slab = new byte[chunkSize];
+        keep.add(slab);
+        bytesAllocated.addAndGet(slab.length);
+        if ((keep.size() & 3) == 0)
+          printMemory("占用进度 (块数=" + keep.size() + ")");
+      }
+    } catch (OutOfMemoryError oom) {
+      System.out.println("检测到 OOME，堆已被占满，准备释放");
+    }
+
+    keep = null;
+    forceGc();
+    printMemory("占满后 GC 完成");
+  }
+
+  /** 场景12：持续分配 Object，并验证引用永不为 null */
+  private static void testPlainObjectReferences() {
+    printMemory("开始前");
+    List<Object> keep = new ArrayList<>();
+    long count = 0;
+    try {
+      while (true) {
+        Object ref = new Object();
+        if (ref == null)
+          throw new AssertionError("new Object() unexpectedly returned null");
+        keep.add(ref);
+        if ((count % 10000000) == 0) {
+          printMemory("progress count=" + count);
+        }
+        count++;
+      }
+    } catch (OutOfMemoryError oom) {
+      System.out.println("Object reference stress hit OOM at count=" + count);
+    } finally {
+      keep.clear();
+      forceGc();
+      printMemory("释放后");
     }
   }
 

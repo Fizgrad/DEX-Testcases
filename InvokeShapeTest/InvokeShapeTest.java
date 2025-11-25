@@ -57,13 +57,13 @@ public class InvokeShapeTest {
     double d = 4.5;
     int extra = 42;
 
-    long e1 = staticTargetNonRange(a, b, c, d, box);
     long r1 = staticTargetNonRange(a, b, c, d, box);
-    assertEquals("invoke-static (non-range)", e1, r1);
+    long expected1 = 4697817368861081846L;
+    assertEquals("invoke-static (non-range)", expected1, r1);
 
-    long e2 = staticTargetRange(a, b, c, d, box, extra);
     long r2 = staticTargetRange(a, b, c, d, box, extra);
-    assertEquals("invoke-static/range", e2, r2);
+    long expected2 = 4697817368861098742L;
+    assertEquals("invoke-static/range", expected2, r2);
   }
 
   // =========================================================
@@ -96,13 +96,13 @@ public class InvokeShapeTest {
     double d = 2.75;
     int extra = 11;
 
-    long e1 = t.instanceNonRange(a, b, c, d, box);
     long r1 = t.instanceNonRange(a, b, c, d, box);
-    assertEquals("invoke-instance (non-range)", e1, r1);
+    long expected1 = 4640396473524027903L;
+    assertEquals("invoke-instance (non-range)", expected1, r1);
 
-    long e2 = t.instanceRange(a, b, c, d, box, extra);
     long r2 = t.instanceRange(a, b, c, d, box, extra);
-    assertEquals("invoke-instance/range", e2, r2);
+    long expected2 = 4640396473524033388L;
+    assertEquals("invoke-instance/range", expected2, r2);
   }
 
   // =========================================================
@@ -142,13 +142,13 @@ public class InvokeShapeTest {
     int extra = 77;
 
     // 静态类型是接口 → 生成 invoke-interface / invoke-interface-range
-    long e1 = iface.ifaceNonRange(a, b, c, d, box);
     long r1 = iface.ifaceNonRange(a, b, c, d, box);
-    assertEquals("invoke-interface (non-range)", e1, r1);
+    long expected1 = 5065071844562831236L;
+    assertEquals("invoke-interface (non-range)", expected1, r1);
 
-    long e2 = iface.ifaceRange(a, b, c, d, box, extra);
     long r2 = iface.ifaceRange(a, b, c, d, box, extra);
-    assertEquals("invoke-interface/range", e2, r2);
+    long expected2 = 5065071844562876067L;
+    assertEquals("invoke-interface/range", expected2, r2);
   }
 
   // =========================================================
@@ -192,9 +192,9 @@ public class InvokeShapeTest {
     MethodHandle mh1 = MethodHandles.lookup().findStatic(
         InvokeShapeTest.class, "polyTargetNonRange", mt1);
 
-    long e1 = polyTargetNonRange(a, b, c, d, box);
+    long expected1 = 2431943798780067840L;
     long r1 = (long)mh1.invokeExact(a, b, c, d, box);
-    assertEquals("invoke-polymorphic (non-range)", e1, r1);
+    assertEquals("invoke-polymorphic (non-range)", expected1, r1);
 
     // ---- range：MethodHandle + 6 动态参数（共 7，“this+5”）----
     MethodType mt2 =
@@ -203,9 +203,9 @@ public class InvokeShapeTest {
     MethodHandle mh2 = MethodHandles.lookup().findStatic(
         InvokeShapeTest.class, "polyTargetRange", mt2);
 
-    long e2 = polyTargetRange(a, b, c, d, box, extra);
+    long expected2 = 4764808413377008552L;
     long r2 = (long)mh2.invokeExact(a, b, c, d, box, extra);
-    assertEquals("invoke-polymorphic/range", e2, r2);
+    assertEquals("invoke-polymorphic/range", expected2, r2);
   }
 
   // =========================================================
@@ -236,15 +236,15 @@ public class InvokeShapeTest {
 
     // 捕获 5 个变量 → invoke-custom（非 range）
     LongSupplier sup1 = () -> customSinkNonRange(a, b, c, d, box);
-    long e1 = customSinkNonRange(a, b, c, d, box);
+    long expected1 = 4688247219638240228L;
     long r1 = sup1.getAsLong();
-    assertEquals("invoke-custom (non-range)", e1, r1);
+    assertEquals("invoke-custom (non-range)", expected1, r1);
 
     // 捕获 7 个变量 → invoke-custom/range
     LongSupplier sup2 = () -> customSinkRange(a, b, c, d, box, extra1, extra2);
-    long e2 = customSinkRange(a, b, c, d, box, extra1, extra2);
+    long expected2 = 4688247219638293781L;
     long r2 = sup2.getAsLong();
-    assertEquals("invoke-custom/range", e2, r2);
+    assertEquals("invoke-custom/range", expected2, r2);
   }
 
   // =========================================================

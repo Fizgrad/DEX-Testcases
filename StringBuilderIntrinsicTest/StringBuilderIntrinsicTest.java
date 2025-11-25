@@ -10,6 +10,9 @@ public class StringBuilderIntrinsicTest {
       testFloatingPointConversion();
       testComplexMix();
       testPathConstruction(); // 模拟导致 ICU Crash 的场景
+      testLargeStringConcats();
+      testBuilderReuseAndSlices();
+      testStringFloodUntilOom();
 
       System.out.println("SUCCESS: All StringBuilder tests passed!");
     } catch (Throwable t) {
@@ -145,5 +148,101 @@ public class StringBuilderIntrinsicTest {
     // 验证结果是否真的可用（不包含不可见垃圾字符）
 
     System.out.println(result.charAt(result.indexOf('$')));
+  }
+
+  // 7. 大量字符串拼接，用于拉伸 StringBuilder 内部缓冲区增长策略
+  private static void testLargeStringConcats() {
+    System.out.println("Test 7: Large String Concats");
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < 20_000; i++) {
+      sb.append("segment-")
+          .append(i)
+          .append('#')
+          .append((char)('a' + (i % 26)))
+          .append('|');
+    }
+    String result = sb.toString();
+    if (!result.startsWith("segment-0") || !result.contains("segment-19999")) {
+      throw new AssertionError("Large concat content mismatch");
+    }
+    for (int probe : new int[] {0, 1234, 19999}) {
+      char letter = (char)('a' + (probe % 26));
+      String pattern = "segment-" + probe + "#" + letter + "|";
+      if (!result.contains(pattern))
+        throw new AssertionError("Missing block pattern: " + pattern);
+    }
+    System.out.println("Large concat total length=" + result.length());
+  }
+
+  // 8. 反复复用 StringBuilder 并切片，验证 capacity/length 调整逻辑
+  private static void testBuilderReuseAndSlices() {
+    System.out.println("Test 8: Builder Reuse & Slices");
+    String base = "0123456789ABCDEF";
+    String reverse = new StringBuilder(base).reverse().toString();
+    StringBuilder sb = new StringBuilder(256);
+    for (int i = 0; i < 10_000; i++) {
+      sb.setLength(0);
+      sb.append(base)
+          .append('-')
+          .append(i)
+          .append('-')
+          .append(reverse)
+          .append(':')
+          .append(base.substring(i % base.length()));
+      String snapshot = sb.toString();
+      if (!snapshot.startsWith(base))
+        throw new AssertionError("Iteration " + i + " missing base prefix");
+      if (!snapshot.contains("-" + i + "-"))
+        throw new AssertionError("Iteration " + i + " lost numeric payload");
+      String suffix = base.substring(i % base.length());
+      if (!snapshot.endsWith(suffix))
+        throw new AssertionError("Iteration " + i + " wrong suffix slice");
+    }
+    System.out.println("Builder reuse iterations completed");
+  }
+
+  // 9. 极端情况：持续生成并持有大字符串，直至触发 OOM，以验证
+  //    StringBuilder/String 对堆的影响（用户需求）
+  private static void testStringFloodUntilOom() {
+    System.out.println("Test 9: String Flood (expect OOM)");
+    java.util.List<String> holder = new java.util.ArrayList<>();
+    long totalChars = 0;
+    int strings = 0;
+    try {
+      while (true) {
+        StringBuilder sb = new StringBuilder(256 * 1024);
+        for (int i = 0; i < 2048; i++) {
+          sb.append("payload-")
+              .append(strings)
+              .append('-')
+              .append(i)
+              .append(':');
+        }
+        String s = sb.toString();
+        String sentinel = "payload-" + strings + "-2047:";
+        if (!s.contains(sentinel))
+          throw new AssertionError("Flood string missing sentinel " + sentinel);
+        holder.add(s);
+        totalChars += s.length();
+        strings++;
+        if ((strings & 63) == 0) {
+          System.out.println("strings=" + strings + ", total chars≈" +
+                             (totalChars / 1024) + " KiB");
+          String sample = holder.get(holder.size() / 2);
+          if (!sample.startsWith("payload-"))
+            throw new AssertionError("Sample corrupted; prefix=" +
+                                     sample.substring(0, Math.min(16, sample.length())));
+        }
+      }
+    } catch (OutOfMemoryError oom) {
+      System.out.println("OOM triggered after holding " + strings +
+                         " strings (~" + (totalChars / (1024 * 1024)) +
+                         " MiB of char data)");
+    } finally {
+      holder.clear();
+      // 尽力释放堆，方便后续测试/诊断
+      holder = null;
+      System.gc();
+    }
   }
 }
