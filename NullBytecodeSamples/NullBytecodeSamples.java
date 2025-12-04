@@ -38,10 +38,25 @@ public final class NullBytecodeSamples {
     return identity(o); // 让 o 逃逸，避免死代码消除
   }
 
+  public Object getObject() {
+    Object c = new Object[1];
+    return c;
+  }
+
   // 标记为 synchronized 通常会抑制激进内联，保持调用边界（Debug 构建尤甚）
   private static synchronized Object identity(Object v) { return v; }
 
   public static void main(String[] args) {
+    int a = -1;
+    if (args.length > 0) {
+      System.out.println(a);
+    }
+    NullBytecodeSamples test = new NullBytecodeSamples();
+    Object c = test.getObject();
+    Object d = new Object();
+    if (c == d) {
+      System.out.println(a);
+    }
     System.out.println("storeNullToStaticField: " + storeNullToStaticField());
     System.out.println("storeNullToArray: " + storeNullToArray());
     System.out.println("localBecomesNullThenEscapes: " +

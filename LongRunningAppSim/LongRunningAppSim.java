@@ -66,7 +66,7 @@ public class LongRunningAppSim {
 
         // 额外长期保留对象，不释放，模拟慢性泄漏/堆持续增长（强/弱策略分离）
         if ((iter & 31) == 0) {
-          boolean canGrowSticky = usage < 0.98;
+          boolean canGrowSticky = usage < 0.95;
           Payload stickyPayload = newStickyPayload(iter);
           stickyPayload.touch();
           boolean strongHold = RAND.nextBoolean();

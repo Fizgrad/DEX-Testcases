@@ -1,3 +1,4 @@
+import java.lang.reflect.Method;
 import java.lang.ref.*;
 import java.util.*;
 import java.util.concurrent.*;
@@ -78,6 +79,7 @@ public class HeapStressSuite {
 
   public static void main(String[] args) {
     System.out.println("========== Heap Allocation Test ==========");
+    runGcStatus();
     testVarietyWarmup();
     System.out.println("========== 测试场景0: 运行时信息 ==========");
     printRuntimeInfo();
@@ -535,6 +537,125 @@ public class HeapStressSuite {
     System.gc();
     sleepMs(800); // 给 GC 一点时间（可按需调整）
     pollRefQueue();
+  }
+
+  private static void runGcStatus() {
+    System.out.println("========== 子测试: GCStatus ==========");
+    Integer memClass = null;
+    Integer largeMemClass = null;
+    String amSource = null;
+    String amError = null;
+
+    try {
+      Class<?> amClass = Class.forName("android.app.ActivityManager");
+      Method staticMem = findNoArgMethod(amClass, "staticGetMemoryClass");
+      Method staticLarge =
+          findNoArgMethod(amClass, "staticGetLargeMemoryClass");
+
+      if (staticMem != null) {
+        memClass = (Integer)staticMem.invoke(null);
+        amSource = "staticGetMemoryClass";
+      }
+      if (staticLarge != null) {
+        largeMemClass = (Integer)staticLarge.invoke(null);
+        amSource = (amSource == null) ? "staticGetLargeMemoryClass" : amSource;
+      }
+
+      if (memClass == null || largeMemClass == null) {
+        Object ctx = tryGetApplicationContext();
+        if (ctx != null) {
+          Method getSystemService =
+              ctx.getClass().getMethod("getSystemService", String.class);
+          Object am = getSystemService.invoke(ctx, "activity");
+          if (am != null) {
+            Method getMemoryClass = am.getClass().getMethod("getMemoryClass");
+            Method getLargeMemoryClass =
+                am.getClass().getMethod("getLargeMemoryClass");
+            if (memClass == null)
+              memClass = (Integer)getMemoryClass.invoke(am);
+            if (largeMemClass == null)
+              largeMemClass = (Integer)getLargeMemoryClass.invoke(am);
+            amSource =
+                (amSource == null) ? "Context.getSystemService" : amSource;
+          } else {
+            amError = "activity service unavailable";
+          }
+        } else {
+          amError = "no application context";
+        }
+      }
+    } catch (Throwable t) {
+      String msg = t.getMessage();
+      amError = t.getClass().getSimpleName() +
+                (msg != null ? (": " + msg) : "");
+    }
+
+    long maxMemory = Runtime.getRuntime().maxMemory();
+    Long nativeHeapSize = tryGetNativeHeapSize();
+
+    System.out.println(
+        "  ActivityManager.getMemoryClass: " +
+        formatOptionalValue(memClass, amSource, amError, "MB"));
+    System.out.println(
+        "  ActivityManager.getLargeMemoryClass: " +
+        formatOptionalValue(largeMemClass, amSource, amError, "MB"));
+    System.out.printf(Locale.ROOT, "  Runtime.getRuntime().maxMemory(): %.1f MB%n",
+                      bytesToMB(maxMemory));
+    System.out.println(
+        "  Debug.getNativeHeapSize(): " +
+        (nativeHeapSize != null
+             ? String.format(Locale.ROOT, "%.1f MB", bytesToMB(nativeHeapSize))
+             : "unavailable"));
+  }
+
+  private static Long tryGetNativeHeapSize() {
+    try {
+      Class<?> debugClass = Class.forName("android.os.Debug");
+      Method m = debugClass.getMethod("getNativeHeapSize");
+      return (Long)m.invoke(null);
+    } catch (Throwable ignored) {
+      return null;
+    }
+  }
+
+  private static Method findNoArgMethod(Class<?> cls, String name) {
+    try {
+      Method m = cls.getDeclaredMethod(name);
+      m.setAccessible(true);
+      return m;
+    } catch (Throwable ignored) {
+      return null;
+    }
+  }
+
+  private static Object tryGetApplicationContext() {
+    try {
+      Class<?> appGlobals = Class.forName("android.app.AppGlobals");
+      Method getInitialApplication =
+          appGlobals.getMethod("getInitialApplication");
+      Object app = getInitialApplication.invoke(null);
+      if (app != null)
+        return app;
+    } catch (Throwable ignored) {
+    }
+    try {
+      Class<?> activityThread = Class.forName("android.app.ActivityThread");
+      Method currentApplication =
+          activityThread.getMethod("currentApplication");
+      Object app = currentApplication.invoke(null);
+      if (app != null)
+        return app;
+    } catch (Throwable ignored) {
+    }
+    return null;
+  }
+
+  private static String formatOptionalValue(Integer value, String source,
+                                            String error, String unit) {
+    if (value != null)
+      return value + " " + unit +
+             (source != null ? (" (" + source + ")") : "");
+    return "unavailable" + (error != null ? (" (" + error + ")") : "");
   }
 
   private static void printRuntimeInfo() {
