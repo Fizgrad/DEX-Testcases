@@ -1,7 +1,7 @@
 # Edit these to match your local SDK/NDK layout. Override per build if you prefer.
 
-ANDROID_SDK ?=~/Sdk
-ANDROID_NDK ?=~/ndk/android-ndk-r27d
+ANDROID_SDK ?=/home/david/Sdk
+ANDROID_NDK ?=/home/david/Sdk/ndk/29.0.14206865
 
 # SDK build-tools d8. If ANDROID_SDK is unset, falls back to `d8`.
 BUILD_TOOLS_VERSION ?= 36.1.0
