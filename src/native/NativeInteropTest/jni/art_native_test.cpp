@@ -41,7 +41,7 @@ static inline uint64_t bit_cast_u64(double value) {
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeProbe(
+Java_ArtNativeTest_nativeProbe(
     JNIEnv *env, jclass /*clazz*/, jlong ptr, jlong theme_ptr,
     jint def_style_attr, jint def_style_resid, jlong xml_parser_ptr,
     jintArray java_attrs, jlong out_values_ptr, jlong out_indices_ptr) {
@@ -87,63 +87,63 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeProbe(
 }
 
 extern "C" JNIEXPORT jboolean JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeBooleanEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeBooleanEcho(JNIEnv *, jclass,
                                                            jboolean value) {
   LOGI("nativeBooleanEcho received=%s", value == JNI_TRUE ? "true" : "false");
   return value;
 }
 
 extern "C" JNIEXPORT jbyte JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeByteEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeByteEcho(JNIEnv *, jclass,
                                                         jbyte value) {
   LOGI("nativeByteEcho received=%d", (int)value);
   return value;
 }
 
 extern "C" JNIEXPORT jchar JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeCharEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeCharEcho(JNIEnv *, jclass,
                                                         jchar value) {
   LOGI("nativeCharEcho received=0x%04x ('%c')", (unsigned)value, (char)value);
   return value;
 }
 
 extern "C" JNIEXPORT jshort JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeShortEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeShortEcho(JNIEnv *, jclass,
                                                          jshort value) {
   LOGI("nativeShortEcho received=%d", (int)value);
   return value;
 }
 
 extern "C" JNIEXPORT jint JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeIntEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeIntEcho(JNIEnv *, jclass,
                                                        jint value) {
   LOGI("nativeIntEcho received=0x%08x", (uint32_t)value);
   return value;
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeLongEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeLongEcho(JNIEnv *, jclass,
                                                         jlong value) {
   LOGI("nativeLongEcho received=0x%016" PRIx64, (uint64_t)value);
   return value;
 }
 
 extern "C" JNIEXPORT jfloat JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeFloatEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeFloatEcho(JNIEnv *, jclass,
                                                          jfloat value) {
   LOGI("nativeFloatEcho received=%f", (double)value);
   return value;
 }
 
 extern "C" JNIEXPORT jdouble JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeDoubleEcho(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeDoubleEcho(JNIEnv *, jclass,
                                                           jdouble value) {
   LOGI("nativeDoubleEcho received=%lf", value);
   return value;
 }
 
 extern "C" JNIEXPORT jstring JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeStringEcho(JNIEnv *env, jclass,
+Java_ArtNativeTest_nativeStringEcho(JNIEnv *env, jclass,
                                                           jstring value) {
   if (!value) {
     LOGI("nativeStringEcho received=null");
@@ -160,7 +160,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeStringEcho(JNIEnv *env, jcl
 }
 
 extern "C" JNIEXPORT jbyteArray JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeByteArrayEcho(JNIEnv *env,
+Java_ArtNativeTest_nativeByteArrayEcho(JNIEnv *env,
                                                              jclass,
                                                              jbyteArray array) {
   if (!array) {
@@ -180,7 +180,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeByteArrayEcho(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT jintArray JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeIntArrayEcho(JNIEnv *env, jclass,
+Java_ArtNativeTest_nativeIntArrayEcho(JNIEnv *env, jclass,
                                                             jintArray array) {
   if (!array) {
     LOGI("nativeIntArrayEcho received=null");
@@ -199,7 +199,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeIntArrayEcho(JNIEnv *env, j
 }
 
 extern "C" JNIEXPORT jlongArray JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeLongArrayEcho(JNIEnv *env,
+Java_ArtNativeTest_nativeLongArrayEcho(JNIEnv *env,
                                                              jclass,
                                                              jlongArray array) {
   if (!array) {
@@ -219,7 +219,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeLongArrayEcho(JNIEnv *env,
 }
 
 extern "C" JNIEXPORT jbooleanArray JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeBooleanArrayEcho(
+Java_ArtNativeTest_nativeBooleanArrayEcho(
     JNIEnv *env, jclass, jbooleanArray array) {
   if (!array) {
     LOGI("nativeBooleanArrayEcho received=null");
@@ -239,7 +239,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeBooleanArrayEcho(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeMultiPrimitiveChecksum(
+Java_ArtNativeTest_nativeMultiPrimitiveChecksum(
     JNIEnv *, jclass, jboolean bool_value, jbyte byte_value, jchar char_value,
     jshort short_value, jint int_value, jlong long_value, jfloat float_value,
     jdouble double_value) {
@@ -267,7 +267,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeMultiPrimitiveChecksum(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeMixedReferenceChecksum(
+Java_ArtNativeTest_nativeMixedReferenceChecksum(
     JNIEnv *env, jclass, jboolean flag, jstring text, jintArray ints,
     jlongArray longs, jbooleanArray bools) {
 
@@ -371,7 +371,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeMixedReferenceChecksum(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum3(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeComboChecksum3(JNIEnv *, jclass,
                                                               jint a, jlong b,
                                                               jdouble c) {
   LOGI("nativeComboChecksum3 a=0x%08x b=0x%016" PRIx64 " c=%lf", (uint32_t)a,
@@ -385,7 +385,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum3(JNIEnv *, jc
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum5(JNIEnv *, jclass,
+Java_ArtNativeTest_nativeComboChecksum5(JNIEnv *, jclass,
                                                               jboolean flag,
                                                               jbyte b, jshort s,
                                                               jint i, jlong l) {
@@ -403,7 +403,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum5(JNIEnv *, jc
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum7(
+Java_ArtNativeTest_nativeComboChecksum7(
     JNIEnv *, jclass, jfloat f1, jdouble d1, jlong l1, jint i1, jshort s1,
     jbyte b1, jboolean flag) {
   LOGI("nativeComboChecksum7 f1=%f d1=%lf l1=0x%016" PRIx64
@@ -423,7 +423,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum7(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum9(
+Java_ArtNativeTest_nativeComboChecksum9(
     JNIEnv *, jclass, jint a1, jint a2, jlong l1, jlong l2, jfloat f1,
     jfloat f2, jdouble d1, jdouble d2, jboolean flag) {
   LOGI("nativeComboChecksum9 ints=[%d,%d] longs=[0x%016" PRIx64 ",0x%016" PRIx64
@@ -445,7 +445,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum9(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum13(
+Java_ArtNativeTest_nativeComboChecksum13(
     JNIEnv *, jclass, jlong l1, jlong l2, jlong l3, jlong l4, jlong l5, jint i1,
     jint i2, jint i3, jshort s1, jshort s2, jbyte b1, jboolean flag,
     jdouble d1) {
@@ -474,7 +474,7 @@ Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum13(
 }
 
 extern "C" JNIEXPORT jlong JNICALL
-Java_com_art_tests_nativeinterop_ArtNativeTest_nativeComboChecksum20(
+Java_ArtNativeTest_nativeComboChecksum20(
     JNIEnv *, jclass, jlong p1, jlong p2, jlong p3, jlong p4, jlong p5,
     jlong p6, jlong p7, jlong p8, jlong p9, jlong p10, jint i1, jint i2,
     jint i3, jint i4, jint i5, jshort s1, jshort s2, jbyte b1, jbyte b2,

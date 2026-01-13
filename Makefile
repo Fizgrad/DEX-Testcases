@@ -1,6 +1,17 @@
 -include config.mk
 
-COMMON_SRC_DIR := src/main/java/com/art/tests/common
+SRC_DIR_DEFAULT := src
+
+# Shared sources that are safe to compile everywhere (no Android dependencies).
+SRC_COMMON := src/TestSupport.java src/JitSupport.java src/TestKind.java
+
+# Modules whose main class does not match `<Module>.java`.
+MAIN_NativeInteropTest := src/ArtNativeTest.java
+
+# Optional per-module extras:
+#   SRC_EXTRA_<Module> := src/Foo.java src/Bar.java
+# Optional per-module full override:
+#   SRC_OVERRIDE_<Module> := <complete list>
 ANDROID_STUB_JAR ?= $(if $(ANDROID_SDK),$(ANDROID_SDK)/platforms/$(PLATFORM_API)/android.jar,)
 ANDROID_JAR ?= $(ANDROID_STUB_JAR)
 JAVAC_FLAGS_ANDROID := -encoding UTF-8 -source 1.8 -target 1.8 -cp $(ANDROID_STUB_JAR)
@@ -10,39 +21,33 @@ JAVA_MODULES := AllTests \
 	BytecodePlayground \
 	BytecodePlaygroundJit \
 	GcReferenceSuite \
+	GcRootStackMapTest \
 	HashCodeStabilityTest \
 	HeapStressSuite \
 	HelloWorldSample \
 	ICUTestSuite \
+	IntrinsicsTest \
 	InvokeShapeTest \
 	LocalePrintfRepro \
 	LongRunningAppSim \
 	NativeIOSmoke \
 	NullBytecodeSamples \
 	RandomObjectChaosTest \
+	ReferencePhiMergeTest \
+	RegAllocMoveStressTest \
+	StackMapConstTest \
 	StringBuilderIntrinsicTest \
-	StringEqualsTest
+	StringEqualsTest \
+	WriteBarrierStressTest
 
 MODULES := $(JAVA_MODULES) NativeInteropTest
 
-SRC_DIRS_AllTests := src/main/java
-SRC_DIRS_ByteBufferTest := src/main/java/com/art/tests/bytebuffer
-SRC_DIRS_BytecodePlayground := src/main/java/com/art/tests/bytecode
-SRC_DIRS_BytecodePlaygroundJit := src/main/java/com/art/tests/bytecode
-SRC_DIRS_GcReferenceSuite := src/main/java/com/art/tests/gc
-SRC_DIRS_HashCodeStabilityTest := src/main/java/com/art/tests/hash
-SRC_DIRS_HeapStressSuite := src/main/java/com/art/tests/heap
-SRC_DIRS_HelloWorldSample := src/main/java/com/art/tests/hello
-SRC_DIRS_ICUTestSuite := src/main/java/com/art/tests/icu
-SRC_DIRS_InvokeShapeTest := src/main/java/com/art/tests/invoke
-SRC_DIRS_LocalePrintfRepro := src/main/java/com/art/tests/locale
-SRC_DIRS_LongRunningAppSim := src/main/java/com/art/tests/longrun
-SRC_DIRS_NativeIOSmoke := src/main/java/com/art/tests/nativeio
-SRC_DIRS_NativeInteropTest := src/main/java/com/art/tests/nativeinterop
-SRC_DIRS_NullBytecodeSamples := src/main/java/com/art/tests/nullbytecode
-SRC_DIRS_RandomObjectChaosTest := src/main/java/com/art/tests/random
-SRC_DIRS_StringBuilderIntrinsicTest := src/main/java/com/art/tests/stringbuilder
-SRC_DIRS_StringEqualsTest := src/main/java/com/art/tests/stringequals
+define module_src
+$(strip \
+  $(if $(SRC_OVERRIDE_$1),$(SRC_OVERRIDE_$1), \
+    $(if $(filter AllTests,$1),$(sort $(wildcard $(SRC_DIR_DEFAULT)/*.java)), \
+      $(if $(MAIN_$1),$(MAIN_$1),$(SRC_DIR_DEFAULT)/$1.java) $(SRC_COMMON) $(SRC_EXTRA_$1))))
+endef
 
 NO_COMMON_AllTests := 1
 
@@ -61,6 +66,8 @@ MIN_API_InvokeShapeTest := 35
 
 D8_LIB_NativeInteropTest := --lib $(ANDROID_JAR)
 
+MIN_API_IntrinsicsTest := 26
+
 ADB ?= adb
 LIB_REMOTE ?= /data/local/tmp/libartnativetest.so
 NATIVE_SRC_DIR := src/native/NativeInteropTest
@@ -71,8 +78,9 @@ ANDROID_PLATFORM ?= android-29
 
 define module_args
 APP=$1 \
-SRC_DIRS="$(SRC_DIRS_$1)" \
-$(if $(NO_COMMON_$1),COMMON_SRC_DIR=,COMMON_SRC_DIR="$(COMMON_SRC_DIR)") \
+SRC_DIRS="$(SRC_DIR_DEFAULT)" \
+SRC="$(call module_src,$1)" \
+COMMON_SRC_DIR= \
 $(if $(MIN_API_$1),MIN_API="$(MIN_API_$1)") \
 $(if $(JAVAC_FLAGS_$1),JAVAC_FLAGS="$(JAVAC_FLAGS_$1)") \
 $(if $(D8_LIB_$1),D8_LIB="$(D8_LIB_$1)") \
@@ -83,53 +91,51 @@ define run_module
 	$(MAKE) -f module.mk $(call module_args,$1) $(2)
 endef
 
-.PHONY: all modules clean clean-native push \
+.PHONY: all push clean \
 	$(JAVA_MODULES) $(JAVA_MODULES:%=%-push) $(JAVA_MODULES:%=%-clean) \
-	NativeInteropTest NativeInteropTest-java NativeInteropTest-native \
-	NativeInteropTest-push NativeInteropTest-clean NativeInteropTest-clean-native \
+	NativeInteropTest NativeInteropTest-push NativeInteropTest-clean \
 	check-android-jar check-native-env
 
-all: modules
+all: $(JAVA_MODULES) NativeInteropTest
 
-modules: $(JAVA_MODULES) NativeInteropTest
+clean: $(JAVA_MODULES:%=%-clean) NativeInteropTest-clean
 
-clean: $(JAVA_MODULES:%=%-clean) NativeInteropTest-clean NativeInteropTest-clean-native
-
-push: $(JAVA_MODULES:%=%-push) NativeInteropTest-push
-
-clean-native: NativeInteropTest-clean-native
+push: all $(JAVA_MODULES:%=%-push) NativeInteropTest-push
 
 AllTests AllTests-push ICUTestSuite ICUTestSuite-push: check-android-jar
 
-$(JAVA_MODULES):
-	$(call run_module,$@,)
-
-$(JAVA_MODULES:%=%-push):
-	$(call run_module,$(@:%-push=%),push)
-
-$(JAVA_MODULES:%=%-clean):
-	$(call run_module,$(@:%-clean=%),clean)
-
-NativeInteropTest: check-native-env NativeInteropTest-java NativeInteropTest-native
-
-NativeInteropTest-java: check-native-env
-	$(call run_module,NativeInteropTest,)
-
-NativeInteropTest-native: check-native-env
+define build_nativeinterop_so
 	cmake -S $(NATIVE_SRC_DIR) -B $(NATIVE_BUILD_DIR) \
 		-D CMAKE_TOOLCHAIN_FILE=$(NDK)/build/cmake/android.toolchain.cmake \
 		-D ANDROID_ABI=$(ANDROID_ABI) \
 		-D ANDROID_PLATFORM=$(ANDROID_PLATFORM)
 	cmake --build $(NATIVE_BUILD_DIR) -j
+endef
 
-NativeInteropTest-push: check-native-env NativeInteropTest-java NativeInteropTest-native
+AllTests-push: check-native-env
+	$(call run_module,AllTests,push)
+	$(build_nativeinterop_so)
+	$(ADB) push $(NATIVE_BUILD_DIR)/libartnativetest.so $(LIB_REMOTE)
+
+$(JAVA_MODULES):
+	$(call run_module,$@,)
+
+$(filter-out AllTests-push,$(JAVA_MODULES:%=%-push)):
+	$(call run_module,$(@:%-push=%),push)
+
+$(JAVA_MODULES:%=%-clean):
+	$(call run_module,$(@:%-clean=%),clean)
+
+NativeInteropTest: check-native-env
+	$(call run_module,NativeInteropTest,)
+	$(build_nativeinterop_so)
+
+NativeInteropTest-push: check-native-env NativeInteropTest
 	$(call run_module,NativeInteropTest,push)
 	$(ADB) push $(NATIVE_BUILD_DIR)/libartnativetest.so $(LIB_REMOTE)
 
 NativeInteropTest-clean:
 	$(call run_module,NativeInteropTest,clean)
-
-NativeInteropTest-clean-native:
 	rm -rf $(NATIVE_BUILD_DIR)
 
 check-android-jar:

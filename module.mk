@@ -7,8 +7,8 @@ DEX_DIR := dex/$(APP)
 DEX_FILE := $(DEX_DIR)/$(APP).dex
 MIN_API ?= 21
 
-SRC_DIR ?= src/main/java
-COMMON_SRC_DIR ?= src/main/java/com/art/tests/common
+SRC_DIR ?= src
+COMMON_SRC_DIR ?=
 SRC_DIRS ?= $(SRC_DIR)
 ifneq ($(strip $(COMMON_SRC_DIR)),)
 ifeq ($(filter $(COMMON_SRC_DIR),$(SRC_DIRS)),)

@@ -4,7 +4,7 @@ Small collection of Java snippets used to probe Android Runtime behaviour and by
 
 ## Building (all modules)
 
-All Java sources live under `src/main/java`; native sources live under `src/native/NativeInteropTest`.
+All Java sources live under `src/`; native sources live under `src/native/NativeInteropTest`.
 Build outputs land under `out/<Module>/` and `dex/<Module>/`.
 Typical use:
 
@@ -44,25 +44,31 @@ adb push dex/${TARGET}/${TARGET}.dex /data/local/tmp/
 
 ## Modules
 
-- `AllTests`: Single-dex unified runner (`com.art.tests.runner.AllTests`).
+- `AllTests`: Single-dex unified runner (default package class `AllTests`).
 
 - `ByteBufferTest`: Heap vs direct buffers, order/primitives, slice/duplicate sharing, mark/reset, compact, read-only behaviour.
 - `BytecodePlayground`: Mixed bytecode/stack shape experiments and soak workload.
 - `BytecodePlaygroundJit`: Standalone JIT-prewarmed self-check of bytecode shapes (polymorphism/sync/arithmetic/arrays/returns).
 - `GcReferenceSuite`: GC/reference/ReferenceQueue behaviours.
+- `GcRootStackMapTest`: GC root/stack map stress with local-only references.
 - `HashCodeStabilityTest`: Object identity hash stability exercises.
 - `HeapStressSuite`: Heap pressure + allocation/GC monitoring.
 - `HelloWorldSample`: Minimal hello-world sanity check.
 - `ICUTestSuite`: Exercises `android.icu` (ULocale, Number/Currency/CompactDecimal formats, calendars, time zones, collation, BreakIterator, Transliterator, UnicodeSet, normalization/casing, MessageFormat/PluralRules, MeasureFormat, RelativeDateTimeFormatter, VersionInfo).
+- `IntrinsicsTest`: Broad coverage of compiler/runtime intrinsics (best-effort; skips unavailable APIs).
 - `InvokeShapeTest`: invoke-* shape coverage (static/instance/interface).
 - `LocalePrintfRepro`: Locale printf formatting / NPE repro.
 - `LongRunningAppSim`: Simulated long-running workload shape.
 - `NativeIOSmoke`: mmap/UTF-8/Normalizer/LockSupport smoke checks.
-- `NativeInteropTest`: JNI checksum/probe (main class `com.art.tests.nativeinterop.ArtNativeTest`).
+- `NativeInteropTest`: JNI checksum/probe (main class `ArtNativeTest`).
 - `NullBytecodeSamples`: Null writes in fields/arrays/locals to inspect bytecode.
 - `RandomObjectChaosTest`: Randomized object graph fuzzing.
+- `ReferencePhiMergeTest`: Null/subtype merge patterns for reference propagation.
+- `RegAllocMoveStressTest`: Register pressure + parallel move swap cycles.
+- `StackMapConstTest`: Stack map constant vreg reconstruction with inlined helpers.
 - `StringBuilderIntrinsicTest`: StringBuilder intrinsic/arg shape checks (wide args, mixed types, buffer growth).
 - `StringEqualsTest`: Exhaustive `String.equals` path coverage (self/null/type/length/mismatch/case).
+- `WriteBarrierStressTest`: Old-to-young reference updates under allocation pressure.
 
 ## Running on device ART
 
@@ -75,13 +81,13 @@ dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/cor
 Example for HeapStressSuite:
 
 ```bash
-dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/HeapStressSuite.dex com.art.tests.heap.HeapStressSuite main
+dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/HeapStressSuite.dex HeapStressSuite main
 ```
 
 Example for unified single-dex run:
 
 ```bash
-dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/AllTests.dex com.art.tests.runner.AllTests --short
+dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -Xbootclasspath-locations:/apex/com.android.art/javalib/core-oj.jar:/apex/com.android.art/javalib/core-libart.jar:/apex/com.android.art/javalib/okhttp.jar:/apex/com.android.art/javalib/bouncycastle.jar:/apex/com.android.art/javalib/apache-xml.jar:/apex/com.android.art/javalib/service-art.jar:/apex/com.android.art/javalib/core-icu4j.jar -cp /data/local/tmp/AllTests.dex AllTests --short
 ```
 
 Runner flags:

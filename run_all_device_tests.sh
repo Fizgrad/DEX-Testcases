@@ -45,4 +45,4 @@ fi
   -Xbootclasspath:"${BOOT_JARS}" \
   -Xbootclasspath-locations:"${BOOT_JARS}" \
   ${VM_FLAGS} \
-  -cp "${dex_remote}" com.art.tests.runner.AllTests "$@"
+  -cp "${dex_remote}" AllTests "$@"
