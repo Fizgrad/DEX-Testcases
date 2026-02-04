@@ -92,6 +92,9 @@ public final class GcRootStackMapTest {
   private GcRootStackMapTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
+    SINK = null;
+    BLACKHOLE = 0;
     System.out.println("=== GcRootStackMapTest starting ===");
     int iters = DEFAULT_ITERS;
     int rounds = DEFAULT_ROUNDS;

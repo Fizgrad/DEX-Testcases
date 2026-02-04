@@ -23,6 +23,8 @@ public class NativeIOSmoke {
     static void checkEq(String name, String got, String exp){ if((exp==null? got==null: exp.equals(got))) ok(name + ": " + got); else fail(name, "got="+got+" exp="+exp); }
 
     public static void main(String[] args) {
+        PASS = 0;
+        FAIL = 0;
         try {
             testMmap();
             testUtf8();

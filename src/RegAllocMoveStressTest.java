@@ -12,6 +12,8 @@ public final class RegAllocMoveStressTest {
   private RegAllocMoveStressTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
+    BLACKHOLE = 0;
     System.out.println("=== RegAllocMoveStressTest starting ===");
     int iters = DEFAULT_ITERS;
     int rounds = DEFAULT_ROUNDS;

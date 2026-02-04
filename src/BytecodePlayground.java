@@ -961,6 +961,14 @@ public class BytecodePlayground {
 
   // ====== 原有自检 ======
   private static void runSelfcheckOnce() {
+    // Reset global state so repeated in-process runs stay deterministic.
+    S_I = 1;
+    S_L = 2L;
+    S_F = 3f;
+    S_D = 4d;
+    PASS = 0;
+    FAIL = 0;
+
     BytecodePlayground be = new BytecodePlayground();
     A a = new A();
     B b = new B();

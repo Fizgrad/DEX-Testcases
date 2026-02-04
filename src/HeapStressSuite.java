@@ -80,6 +80,7 @@ public class HeapStressSuite {
   }
 
   public static void main(String[] args) {
+    resetForRepeat();
     System.out.println("========== Heap Allocation Test ==========");
     boolean shortMode = false;
     for (String s : args) {
@@ -158,6 +159,27 @@ public class HeapStressSuite {
         "bytesAllocated≈%.1f MB, weakCleared=%d, phantomEnqueued=%d%n",
         bytesAllocated.get() / (1024.0 * 1024.0), weakCleared.get(),
         phantomEnq.get());
+  }
+
+  private static void resetForRepeat() {
+    staticHolder.clear();
+    bytesAllocated.set(0L);
+    weakCleared.set(0L);
+    phantomEnq.set(0L);
+    WEAKS.clear();
+    SOFTS.clear();
+    PHANTOMS.clear();
+    drainReferenceQueue();
+    try {
+      R.setSeed(2025);
+    } catch (Throwable ignored) {}
+  }
+
+  private static void drainReferenceQueue() {
+    Reference<?> r;
+    while ((r = REF_Q.poll()) != null) {
+      r.clear();
+    }
   }
 
   // ========== 场景实现 ==========

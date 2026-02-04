@@ -46,6 +46,11 @@ public final class WriteBarrierStressTest {
   private WriteBarrierStressTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
+    BLACKHOLE = 0;
+    HOLDER_SINK = null;
+    OBJECT_SINK = null;
+    STATIC_REF = null;
     System.out.println("=== WriteBarrierStressTest starting ===");
     int iters = DEFAULT_ITERS;
     int rounds = DEFAULT_ROUNDS;

@@ -443,9 +443,14 @@ public final class BytecodePlaygroundJit {
   }
 
   public static void main(String[] args) {
+    CTR.reset();
     System.out.println("== JIT 预热自检 (独立版) ==");
     requestJitCompilation();
     StateBox state = new StateBox();
+    StateBox.resetStatic();
+    StateBox.setStaticRef(null);
+    state.resetFields();
+    state.setRef(null);
     A ref = new A();
     testReferencesEqual(state, ref);
     testPolymorphism();

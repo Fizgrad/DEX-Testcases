@@ -65,6 +65,7 @@ adb push dex/${TARGET}/${TARGET}.dex /data/local/tmp/
 - `RandomObjectChaosTest`: Randomized object graph fuzzing.
 - `ReferencePhiMergeTest`: Null/subtype merge patterns for reference propagation.
 - `RegAllocMoveStressTest`: Register pressure + parallel move swap cycles.
+- `SimdSpillSlotTest`: Vectorizable loop kernels to exercise SIMD stack-slot spill/split paths.
 - `StackMapConstTest`: Stack map constant vreg reconstruction with inlined helpers.
 - `StringBuilderIntrinsicTest`: StringBuilder intrinsic/arg shape checks (wide args, mixed types, buffer growth).
 - `StringEqualsTest`: Exhaustive `String.equals` path coverage (self/null/type/length/mismatch/case).
@@ -93,6 +94,8 @@ dalvikvm64 -Xuse-stderr-logger -Xbootclasspath:/apex/com.android.art/javalib/cor
 Runner flags:
 - `--short` (default) or `--full` to control runtime profile
 - `--include=stress` to include stress/native-heavy suites
+- `--repeat=N` to run each suite N times (default: 5)
+- default is fail-fast; use `--noFailFast` (or `--continue`) to keep running after a failure
 - `--only=Name1,Name2` / `--skip=Name1,Name2` / `--list` (short names; legacy long names still work)
 
 Helper scripts:

@@ -110,6 +110,7 @@ public class ArtNativeTest {
   }
 
   public static void main(String[] args) {
+    ERRORS.clear();
     runPointerChecksumTest();
     runPrimitiveRoundTripTests();
     runArrayRoundTripTests();

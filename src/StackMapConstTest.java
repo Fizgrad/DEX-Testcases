@@ -31,6 +31,8 @@ public final class StackMapConstTest {
   private StackMapConstTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
+    BLACKHOLE = 0;
     System.out.println("=== StackMapConstTest starting ===");
     int iters = DEFAULT_ITERS;
     int rounds = DEFAULT_ROUNDS;

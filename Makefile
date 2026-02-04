@@ -35,6 +35,7 @@ JAVA_MODULES := AllTests \
 	RandomObjectChaosTest \
 	ReferencePhiMergeTest \
 	RegAllocMoveStressTest \
+	SimdSpillSlotTest \
 	StackMapConstTest \
 	StringBuilderIntrinsicTest \
 	StringEqualsTest \

@@ -12,6 +12,7 @@ public final class ByteBufferTest {
   private ByteBufferTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
     System.out.println("== ByteBuffer tests ==");
     try {
       testHeapVsDirect();
@@ -22,6 +23,8 @@ public final class ByteBufferTest {
       testArrayWrapSharing();
       testReadOnly();
       TestSupport.summary("ByteBufferTest", CTR);
+      if (CTR.getFail() != 0)
+        System.exit(1);
     } catch (Throwable t) {
       t.printStackTrace();
       System.out.println("FAIL=" + (CTR.getFail() + 1));

@@ -1,5 +1,6 @@
  
-
+ 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public final class AllTests {
+  private static final int DEFAULT_REPEAT = 5;
+
   private static final class Entry {
     final String name;
     final TestKind kind;
@@ -35,15 +38,17 @@ public final class AllTests {
     final boolean shortMode;
     final boolean failFast;
     final boolean listOnly;
+    final int repeat;
     final Set<String> only;
     final Set<String> skip;
 
     Options(boolean includeStress, boolean shortMode, boolean failFast,
-            boolean listOnly, Set<String> only, Set<String> skip) {
+            boolean listOnly, int repeat, Set<String> only, Set<String> skip) {
       this.includeStress = includeStress;
       this.shortMode = shortMode;
       this.failFast = failFast;
       this.listOnly = listOnly;
+      this.repeat = repeat;
       this.only = only;
       this.skip = skip;
     }
@@ -51,8 +56,9 @@ public final class AllTests {
     static Options parse(String[] args) {
       boolean includeStress = false;
       boolean shortMode = true;
-      boolean failFast = false;
+      boolean failFast = true;
       boolean listOnly = false;
+      int repeat = DEFAULT_REPEAT;
       Set<String> only = new HashSet<>();
       Set<String> skip = new HashSet<>();
 
@@ -65,15 +71,21 @@ public final class AllTests {
           shortMode = true;
         } else if ("--failFast".equals(s)) {
           failFast = true;
+        } else if ("--noFailFast".equals(s) || "--continue".equals(s)) {
+          failFast = false;
         } else if ("--list".equals(s)) {
           listOnly = true;
+        } else if (s.startsWith("--repeat=")) {
+          repeat = parseIntOrDefault(s.substring(s.indexOf('=') + 1), repeat);
         } else if (s.startsWith("--only=")) {
           only.addAll(splitList(s.substring(s.indexOf('=') + 1)));
         } else if (s.startsWith("--skip=")) {
           skip.addAll(splitList(s.substring(s.indexOf('=') + 1)));
         }
       }
-      return new Options(includeStress, shortMode, failFast, listOnly,
+      if (repeat < 1)
+        repeat = 1;
+      return new Options(includeStress, shortMode, failFast, listOnly, repeat,
                          lowerSet(only), lowerSet(skip));
     }
   }
@@ -96,16 +108,17 @@ public final class AllTests {
       if (!shouldRun(opt, e))
         continue;
       String[] runArgs = opt.shortMode ? e.shortArgs : e.fullArgs;
-      System.out.println("== RUN " + e.name + " (" + e.kind + ") ==");
       try {
-        e.runner.run(runArgs);
+        runWithRepeats(opt.repeat, e, runArgs);
         pass++;
       } catch (Throwable t) {
         fail++;
         System.err.println("FAIL " + e.name + ": " + t);
         t.printStackTrace();
-        if (opt.failFast)
-          break;
+        if (opt.failFast) {
+          System.err.println("== AllTests ABORT (failFast) ==");
+          System.exit(1);
+        }
       }
       System.out.println();
     }
@@ -130,6 +143,10 @@ public final class AllTests {
                            IntrinsicsTest::main,
                            new String[] {"--short"}, new String[] {"--full"},
                            "IntrinsicsTest"));
+    list.add(entryWithArgs("SimdSpill", TestKind.SMOKE,
+                           SimdSpillSlotTest::main,
+                           new String[] {"--short"}, new String[] {"--full"},
+                           "SimdSpillSlotTest"));
     list.add(entry("InvokeShape", TestKind.SMOKE,
                    args -> InvokeShapeTest.main(args),
                    "InvokeShapeTest"));
@@ -193,6 +210,43 @@ public final class AllTests {
     return list;
   }
 
+  private static void runWithRepeats(int repeat, Entry e, String[] runArgs)
+      throws Throwable {
+    if (repeat <= 1) {
+      System.out.println("== RUN " + e.name + " (" + e.kind + ") ==");
+      e.runner.run(runArgs);
+      System.out.println();
+      return;
+    }
+
+    System.out.println("== RUN " + e.name + " (" + e.kind + ") x" + repeat + " ==");
+    for (int i = 1; i <= repeat; i++) {
+      try {
+        System.out.println("-- attempt " + i + "/" + repeat + " --");
+        e.runner.run(runArgs);
+      } catch (Throwable t) {
+        printFailureContext(e, runArgs, i, repeat, t);
+        throw t;
+      }
+    }
+    System.out.println();
+  }
+
+  private static void printFailureContext(Entry e, String[] runArgs, int attempt,
+                                          int repeat, Throwable t) {
+    Runtime rt = Runtime.getRuntime();
+    long max = rt.maxMemory();
+    long total = rt.totalMemory();
+    long free = rt.freeMemory();
+    long used = total - free;
+    System.err.println("== FAIL CONTEXT ==");
+    System.err.println("  test=" + e.name + " kind=" + e.kind);
+    System.err.println("  attempt=" + attempt + "/" + repeat);
+    System.err.println("  args=" + Arrays.toString(runArgs));
+    System.err.println("  mem.used=" + used + " mem.total=" + total + " mem.max=" + max);
+    System.err.println("  throwable=" + t.getClass().getName() + ": " + t.getMessage());
+  }
+
   private static Entry entry(String name, TestKind kind, Runner runner,
                              String... aliases) {
     return new Entry(name, kind, runner, new String[] {}, new String[] {},
@@ -224,6 +278,14 @@ public final class AllTests {
         out.add(v);
     }
     return out;
+  }
+
+  private static int parseIntOrDefault(String raw, int def) {
+    try {
+      return Integer.parseInt(raw.trim());
+    } catch (Throwable t) {
+      return def;
+    }
   }
 
   private static Set<String> lowerSet(Set<String> in) {

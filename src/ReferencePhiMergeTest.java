@@ -11,6 +11,7 @@ public final class ReferencePhiMergeTest {
   private ReferencePhiMergeTest() {}
 
   public static void main(String[] args) {
+    CTR.reset();
     System.out.println("=== ReferencePhiMergeTest starting ===");
     int iters = DEFAULT_ITERS;
     int rounds = DEFAULT_ROUNDS;
