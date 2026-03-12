@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.10)
+project(artnativetest LANGUAGES C CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+add_library(artnativetest SHARED jni/art_native_test.cpp)
+target_compile_features(artnativetest PRIVATE cxx_std_17)
+find_library(log-lib log)
+target_link_libraries(artnativetest ${log-lib})
